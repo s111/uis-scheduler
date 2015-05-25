@@ -6,14 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
 	"github.com/s111/uis-scheduler/download"
 )
 
@@ -92,15 +92,6 @@ func main() {
 	subjectIdLookupTable := createLookupTable(subjectsFileList)
 	programs := createPrograms(programsFileList, subjectIdLookupTable)
 
-	b, err := json.MarshalIndent(&programs, "", "    ")
-
-	if err != nil {
-		log.Fatal(err)
-
-	}
-
-	fmt.Println(string(b))
-
 	subjects := make(map[string]*Subject)
 
 	for id, subjectFile := range subjectsFileList {
@@ -143,8 +134,8 @@ func main() {
 					}
 
 					for _, week := range weeks {
-						date := getDate(2015, week, t.getDay()).Add(time.Duration(t.getHour()+8) * time.Hour)
-						subject.Lectures = append(subject.Lectures, Lecture{name, date, length})
+						date := getDate(2015, week, t.getDay()).Add(time.Duration(t.getHour()+8)*time.Hour + 15*time.Minute)
+						subject.Lectures = append(subject.Lectures, Lecture{name, date.Local(), length})
 					}
 
 					t.block(length)
@@ -157,49 +148,22 @@ func main() {
 		subjects[id] = subject
 	}
 
-	err = os.MkdirAll("repo", 0755)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = os.MkdirAll(filepath.Join("repo", "subjects"), 0755)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	pf, err := os.Create(filepath.Join("repo", "programs.json"))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = pf.Write(b)
-
-	if err != nil {
-		log.Fatal("write:", err)
-	}
-
-	pf.Close()
+	m := martini.Classic()
+	m.Use(render.Renderer())
 
 	for id, subject := range subjects {
-		sf, err := os.Create(filepath.Join("repo", "subjects", id+".json"))
-		b, err := json.MarshalIndent(&subject, "", "    ")
-
-		if err != nil {
-			log.Fatal(err)
-
-		}
-
-		_, err = sf.Write(b)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		sf.Close()
+		func(subject *Subject) {
+			m.Get("/subjects/"+id+".json", func(r render.Render) {
+				r.JSON(200, subject)
+			})
+		}(subject)
 	}
+
+	m.Get("/programs.json", func(r render.Render) {
+		r.JSON(200, &programs)
+	})
+
+	m.Run()
 }
 
 func createLookupTable(subjectsFileList map[string]*download.File) map[string]string {
