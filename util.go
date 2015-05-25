@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -48,7 +49,13 @@ func expandRange(s string) ([]int, error) {
 }
 
 func getDate(year, week, day int) time.Time {
-	janFirst := time.Date(2015, 1, 1, 0, 0, 0, 0, time.UTC)
+	loc, err := time.LoadLocation("Europe/Oslo")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	janFirst := time.Date(2015, 1, 1, 0, 0, 0, 0, loc)
 	dayOffset := time.Thursday - janFirst.Weekday()
 	firstThursday := janFirst.AddDate(0, 0, int(dayOffset))
 	_, firstWeek := firstThursday.ISOWeek()
