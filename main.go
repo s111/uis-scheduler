@@ -163,7 +163,7 @@ func main() {
 		r.JSON(200, &programs)
 	})
 
-	m.Run()
+	m.RunOnAddr(":80")
 }
 
 func createLookupTable(subjectsFileList map[string]*download.File) map[string]string {
