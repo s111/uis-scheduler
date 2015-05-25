@@ -15,7 +15,7 @@
         }
         
         .content {
-            padding: 40px 15px;
+            padding: 40px 15px 0px 15px;
         }
     </style>
 
@@ -51,36 +51,28 @@
     </nav>
 
     <div class="container">
-
         <div class="content">
-            <p style="text-align:center;">
-                <a href="#" class="label label-danger">DAT200 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                <a href="#" class="label label-danger">DAT200 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                <a href="#" class="label label-danger">DAT200 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                <a href="#" class="label label-danger">DAT200 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-            </p>
+            <p id="subjects" style="text-align:center;"></p>
 
             <form class="form-group">
-                <div class="col-lg-6">
-                    <div class="input-group">
-                        <select id="course-list" class="form-control">
-                        </select>
-                        <span class="input-group-btn">
-                            <button class="btn btn-primary" type="button">Add</button>
+                <div class="input-group">
+                    <select id="course-list" class="form-control">
+                    </select>
+                    <span class="input-group-btn">
+                            <button id="add-program" class="btn btn-primary" type="button">Add</button>
                         </span>
-                    </div>
                 </div>
             </form>
-
-            <div id="subjects" class="list-group"></div>
         </div>
+        <div id="lectures" class="list-group"></div>
+    </div>
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script src="js/bootstrap.min.js"></script>
-        <script src="js/underscore-min.js"></script>
-        <script src="js/github.js"></script>
-        <script src="js/btoa.js"></script>
-        <script src="js/main.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/underscore-min.js"></script>
+    <script src="js/github.js"></script>
+    <script src="js/btoa.js"></script>
+    <script src="js/main.js"></script>
 
 </body>
 
