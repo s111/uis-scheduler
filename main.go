@@ -54,7 +54,13 @@ func (p Program) MarshalJSON() ([]byte, error) {
 
 type Subject struct {
 	Name     string
+	Id       string
 	Lectures []Lecture
+}
+
+type AltSubject struct {
+	Name string
+	Id   string
 }
 
 type Lecture struct {
@@ -95,7 +101,7 @@ func main() {
 	subjects := make(map[string]*Subject)
 
 	for id, subjectFile := range subjectsFileList {
-		subject := &Subject{Name: subjectFile.Name}
+		subject := &Subject{Name: subjectFile.Name, Id: id}
 
 		b := bytes.NewBufferString(subjectFile.Html)
 
@@ -151,13 +157,21 @@ func main() {
 	m := martini.Classic()
 	m.Use(render.Renderer())
 
+	slist := make([]AltSubject, 0)
+
 	for id, subject := range subjects {
+		slist = append(slist, AltSubject{Name: subject.Name, Id: id})
+
 		func(subject *Subject) {
 			m.Get("/subjects/"+id+".json", func(r render.Render) {
 				r.JSON(200, subject)
 			})
 		}(subject)
 	}
+
+	m.Get("/subjects.json", func(r render.Render) {
+		r.JSON(200, &slist)
+	})
 
 	m.Get("/programs.json", func(r render.Render) {
 		r.JSON(200, &programs)

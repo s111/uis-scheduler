@@ -1,6 +1,7 @@
 var programs
+var subjects
 var lectureList = [];
-var numSubjects = 0;
+var subjectList = [];
 
 var today = new Date("3/23/2015");
 
@@ -9,20 +10,62 @@ $.getJSON("programs.json", function(p) {
 
     _.each(programs, function(program, i) {
         var item = "<option>" + program.Name + "</option>";
-        $("#course-list").append(item);
+        $("#program-list").append(item);
     });
 });
 
+$.getJSON("subjects.json", function(p) {
+    subjects = _.sortBy(p, 'Name');
+
+    _.each(subjects, function(subject, i) {
+        var item = "<option>" + subject.Name + "</option>";
+        $("#subject-list").append(item);
+    });
+});
+
+
 $("#add-program").click(function() {
     if (programs) {
-        var program = programs[$("#course-list option:selected").index()];
+        var program = programs[$("#program-list option:selected").index()];
 
         _.each(program.Subjects, function(id, i) {
+            if (!_.contains(subjectList, id)) {
+                subjectList.push(id);
+
+                $.getJSON("subjects/" + encodeURI(id) + ".json", function(subject) {
+                    $("#subjects").append('<a href="#" class="label label-danger" onClick="removeSubject(this, \'' + btoa(id) + '\')">' + subject.Name.substr(0, 8) + ' <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>\n');
+
+                    _.each(subject.Lectures, function(lecture, j) {
+                        lecture.Subject = id;
+
+                        var d = new Date(lecture.Date);
+
+                        if (d.toDateString() == today.toDateString()) {
+                            lectureList.push(lecture);
+                        }
+                    });
+
+                    updateLectureList();
+                });
+            }
+        });
+    }
+});
+
+$("#add-subject").click(function() {
+    if (subjects) {
+        var subject = subjects[$("#subject-list option:selected").index()];
+        var id = subject.Id;
+
+        if (!_.contains(subjectList, id)) {
+            subjectList.push(id);
+
             $.getJSON("subjects/" + encodeURI(id) + ".json", function(subject) {
-                $("#subjects").append('<a href="#" class="label label-danger" onClick="removeSubject(this, ' + numSubjects + ')">' + subject.Name.substr(0, 8) + ' <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>\n');
+                $("#subjects").append('<a href="#" class="label label-danger" onClick="removeSubject(this, \'' + btoa(id) + '\')">' + subject.Name.substr(0, 8) + ' <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>\n');
 
                 _.each(subject.Lectures, function(lecture, j) {
-                    lecture.Subject = numSubjects;
+                    lecture.Subject = id;
+
                     var d = new Date(lecture.Date);
 
                     if (d.toDateString() == today.toDateString()) {
@@ -30,22 +73,23 @@ $("#add-program").click(function() {
                     }
                 });
 
-                numSubjects++;
-
                 updateLectureList();
             });
-        });
+        }
     }
 });
+
 
 function removeSubject(label, subject) {
     $(label).remove();
 
-    for (var i = lectureList.length - 1; i >= 0; i--) {
-        if (lectureList[i].Subject == subject) {
-            lectureList.splice(i, 1);
-        }
-    }
+    subject = atob(subject);
+
+    subjectList = _.without(subjectList, subject);
+
+    lectureList = _.reject(lectureList, function(lecture) {
+        return lecture.Subject === subject;
+    });
 
     updateLectureList();
 }
