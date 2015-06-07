@@ -163,7 +163,7 @@ func main() {
 		slist = append(slist, AltSubject{Name: subject.Name, Id: id})
 
 		func(subject *Subject) {
-			m.Get("/subjects/"+id+".json", func(r render.Render) {
+			m.Get("/lectures/"+id+".json", func(r render.Render) {
 				r.JSON(200, subject)
 			})
 		}(subject)
