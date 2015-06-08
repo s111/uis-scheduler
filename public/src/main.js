@@ -240,7 +240,7 @@ var Lecture = React.createClass({
 
         $(this.getDOMNode()).parent().find("ul:visible").not(hidden).toggle();
 
-        if (this.props.data.Rooms.length > 0) {
+        if (this.props.data.Rooms.length > 1) {
             $(rooms).toggle();
         }
 
