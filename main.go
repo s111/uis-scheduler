@@ -10,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -24,8 +25,8 @@ const (
 	lectureRowsSelector    = "table[border='1'] > tbody > tr:nth-child(n+2)"
 	lectureColumnsSelector = "table[border='1'] > tbody > tr:nth-child(n+2) > td:nth-child(n+2)"
 
-	lecureRoomsSelector     = "font[color='#000080']"
-	lectureLecturerSelector = "font[color='#FF0000']"
+	lecureRoomsSelector     = "font[color='#000000']"
+	lectureLecturerSelector = "font[color='#000080']"
 	lectureNameSelector     = "font[color='#FF0000']"
 	lectureWeeksSelector    = "font[color='#800000']"
 )
@@ -65,9 +66,11 @@ type AltSubject struct {
 }
 
 type Lecture struct {
-	Name   string
-	Date   time.Time
-	Length int
+	Name      string
+	Rooms     []string
+	Lecturers []string
+	Date      time.Time
+	Length    int
 }
 
 type Programs []Program
@@ -164,13 +167,24 @@ func main() {
 					weekRange := lectureCell.Find(lectureWeeksSelector).Text()
 					weeks, err := expandRange(weekRange)
 
+					rooms := strings.Split(lectureCell.Find(lecureRoomsSelector).Text(), ", ")
+					lecturers := strings.Split(lectureCell.Find(lectureLecturerSelector).Text(), ", ")
+
+					if len(rooms) == 1 && len(rooms[0]) < 1 {
+						rooms = make([]string, 0)
+					}
+
+					if len(lecturers) == 1 && len(lecturers[0]) < 1 {
+						lecturers = make([]string, 0)
+					}
+
 					if err != nil {
 						log.Fatal(err)
 					}
 
 					for _, week := range weeks {
 						date := getDate(2015, week, t.getDay()).Add(time.Duration(t.getHour()+8)*time.Hour + 15*time.Minute)
-						subject.Lectures = append(subject.Lectures, Lecture{name, date.Local(), length})
+						subject.Lectures = append(subject.Lectures, Lecture{name, rooms, lecturers, date.Local(), length})
 					}
 
 					t.block(length)
