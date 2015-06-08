@@ -240,14 +240,12 @@ var Lecture = React.createClass({
 
         $(this.getDOMNode()).parent().find("ul:visible").not(hidden).toggle();
 
-        // TODO: remove first clause when rooms are implemented
-        if (this.props.data.rooms && this.props.data.rooms.length > 0) {
-            rooms.toggle();
+        if (this.props.data.Rooms.length > 0) {
+            $(rooms).toggle();
         }
 
-        // TODO: remove first clause when lecturers are implemented
-        if (this.props.data.lecturers && this.props.data.lecturers.length > 0) {
-            lecturers.toggle();
+        if (this.props.data.Lecturers.length > 0) {
+            $(lecturers).toggle();
         }
     },
 
@@ -259,25 +257,13 @@ var Lecture = React.createClass({
         var lectureStart = start.toTimeString().substring(0, 5);
         var lectureEnd = end.toTimeString().substring(0, 5);
 
-        // TODO: remove saftey-net when rooms and lecturers are implemented
-        var rooms = [];
-        var lecturers = [];
-
-        if (this.props.data.rooms) {
-            rooms = this.props.data.rooms;
-        }
-
-        if (this.props.data.lecturers) {
-            lecturers = this.props.data.lecturers;
-        }
-
-        rooms = rooms.map(function(room) {
+        rooms = this.props.data.Rooms.map(function(room) {
             return (
                 <li className="label label-success btn-mini" key={room}>{room}</li>
             );
         });
 
-        lecturers = lecturers.map(function(lecturer) {
+        lecturers = this.props.data.Lecturers.map(function(lecturer) {
             return (
                 <li className="label label-warning btn-mini btn-mini-long" key={lecturer}>{lecturer}</li>
             );
