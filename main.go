@@ -8,14 +8,13 @@ import (
 	"flag"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
 	"github.com/s111/uis-scheduler/download"
 )
 
@@ -35,6 +34,7 @@ var dl = flag.Bool("download", false, "force download programs and subjects")
 
 type Program struct {
 	Name     string
+	Id       string
 	Subjects map[string]bool
 }
 
@@ -45,11 +45,15 @@ func (p Program) MarshalJSON() ([]byte, error) {
 		subjects = append(subjects, id)
 	}
 
+	sort.Sort(sort.StringSlice(subjects))
+
 	return json.Marshal(struct {
 		Name     string
+		Id       string
 		Subjects []string
 	}{
 		p.Name,
+		p.Id,
 		subjects,
 	})
 }
@@ -80,7 +84,7 @@ func (p Programs) Len() int {
 }
 
 func (p Programs) Less(i, j int) bool {
-	return p[i].Name < p[j].Name
+	return p[i].Id < p[j].Id
 }
 
 func (p Programs) Swap(i, j int) {
@@ -94,7 +98,7 @@ func (s AltSubjects) Len() int {
 }
 
 func (s AltSubjects) Less(i, j int) bool {
-	return s[i].Name < s[j].Name
+	return s[i].Id < s[j].Id
 }
 
 func (s AltSubjects) Swap(i, j int) {
@@ -200,34 +204,86 @@ func main() {
 		subjects[id] = subject
 	}
 
-	m := martini.Classic()
-	m.Use(render.Renderer())
-
 	slist := make(AltSubjects, 0)
 
 	for id, subject := range subjects {
 		slist = append(slist, AltSubject{Name: subject.Name, Id: id})
-
-		func(subject *Subject) {
-			m.Get("/lectures/"+id+".json", func(r render.Render) {
-				r.JSON(200, subject)
-			})
-		}(subject)
 	}
 
 	sort.Sort(slist)
-
-	m.Get("/subjects.json", func(r render.Render) {
-		r.JSON(200, &slist)
-	})
-
 	sort.Sort(programs)
 
-	m.Get("/programs.json", func(r render.Render) {
-		r.JSON(200, &programs)
-	})
+	err = os.MkdirAll("repo", 0755)
 
-	m.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.MkdirAll(filepath.Join("repo", "lectures"), 0755)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pf, err := os.Create(filepath.Join("repo", "programs.json"))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b, err := json.MarshalIndent(&programs, "", "    ")
+
+	if err != nil {
+		log.Fatal(err)
+
+	}
+
+	_, err = pf.Write(b)
+
+	if err != nil {
+		log.Fatal("write:", err)
+	}
+
+	pf.Close()
+
+	sf, err := os.Create(filepath.Join("repo", "subjects.json"))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b, err = json.MarshalIndent(&slist, "", "    ")
+
+	if err != nil {
+		log.Fatal(err)
+
+	}
+
+	_, err = sf.Write(b)
+
+	if err != nil {
+		log.Fatal("write:", err)
+	}
+
+	sf.Close()
+
+	for id, subject := range subjects {
+		lf, err := os.Create(filepath.Join("repo", "lectures", id+".json"))
+		b, err := json.MarshalIndent(&subject, "", "    ")
+
+		if err != nil {
+			log.Fatal(err)
+
+		}
+
+		_, err = lf.Write(b)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		lf.Close()
+	}
 }
 
 func createLookupTable(subjectsFileList map[string]*download.File) map[string]string {
@@ -254,8 +310,8 @@ func createLookupTable(subjectsFileList map[string]*download.File) map[string]st
 func createPrograms(programsFileList map[string]*download.File, subjectIdLookupTable map[string]string) Programs {
 	var programs []Program
 
-	for _, programFile := range programsFileList {
-		program := Program{programFile.Name, make(map[string]bool)}
+	for id, programFile := range programsFileList {
+		program := Program{programFile.Name, id, make(map[string]bool)}
 
 		b := bytes.NewBufferString(programFile.Html)
 
