@@ -75,7 +75,7 @@ func Download() {
 		n++
 	}
 
-	n = 0
+	n = 1
 
 	for id, name := range subjects {
 		fmt.Printf("downloading subject %d of %d\n", n, len(subjects))
