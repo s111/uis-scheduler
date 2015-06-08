@@ -2,14 +2,14 @@ var ids = [];
 
 var today = new Date("3/23/2015");
 
-var CourseSchedule = React.createClass({ 
+var CourseSchedule = React.createClass({
     handleClick: function(id) {
         var subjects = this.state.subjects.slice();
 
         subjects.forEach(function(subject, i) {
             if (subject.Id === id) {
                 subjects.splice(i, 1);
-    
+
                 return;
             }
         });
