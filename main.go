@@ -8,6 +8,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -67,6 +68,34 @@ type Lecture struct {
 	Name   string
 	Date   time.Time
 	Length int
+}
+
+type Programs []Program
+
+func (p Programs) Len() int {
+	return len(p)
+}
+
+func (p Programs) Less(i, j int) bool {
+	return p[i].Name < p[j].Name
+}
+
+func (p Programs) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+}
+
+type AltSubjects []AltSubject
+
+func (s AltSubjects) Len() int {
+	return len(s)
+}
+
+func (s AltSubjects) Less(i, j int) bool {
+	return s[i].Name < s[j].Name
+}
+
+func (s AltSubjects) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
 func main() {
@@ -157,7 +186,7 @@ func main() {
 	m := martini.Classic()
 	m.Use(render.Renderer())
 
-	slist := make([]AltSubject, 0)
+	slist := make(AltSubjects, 0)
 
 	for id, subject := range subjects {
 		slist = append(slist, AltSubject{Name: subject.Name, Id: id})
@@ -169,9 +198,13 @@ func main() {
 		}(subject)
 	}
 
+	sort.Sort(slist)
+
 	m.Get("/subjects.json", func(r render.Render) {
 		r.JSON(200, &slist)
 	})
+
+	sort.Sort(programs)
 
 	m.Get("/programs.json", func(r render.Render) {
 		r.JSON(200, &programs)
@@ -201,7 +234,7 @@ func createLookupTable(subjectsFileList map[string]*download.File) map[string]st
 	return lookupTable
 }
 
-func createPrograms(programsFileList map[string]*download.File, subjectIdLookupTable map[string]string) []Program {
+func createPrograms(programsFileList map[string]*download.File, subjectIdLookupTable map[string]string) Programs {
 	var programs []Program
 
 	for _, programFile := range programsFileList {

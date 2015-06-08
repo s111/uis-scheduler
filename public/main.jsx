@@ -49,6 +49,10 @@ var CourseSchedule = React.createClass({
                 var subjects = this.state.subjects.slice();
                 subjects.push({Name: data.Name, Id: subject});
 
+                subjects.sort(function(a, b) {
+                    return a.Name > b.Name;
+                });
+
                 var lectures = this.state.lectures.slice();
 
                 data.Lectures.forEach(function(lecture) {
@@ -58,6 +62,10 @@ var CourseSchedule = React.createClass({
                         lecture.Id = subject;
                         lectures.push(lecture);
                     }
+                });
+
+                lectures.sort(function(a, b) {
+                    return a.Date > b.Date;
                 });
 
                 this.setState({subjects: subjects, lectures: lectures});
