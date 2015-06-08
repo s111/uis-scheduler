@@ -170,6 +170,9 @@ func main() {
 					rooms := strings.Split(lectureCell.Find(lecureRoomsSelector).Text(), ", ")
 					lecturers := strings.Split(lectureCell.Find(lectureLecturerSelector).Text(), ", ")
 
+					sort.Sort(sort.StringSlice(rooms))
+					sort.Sort(sort.StringSlice(lecturers))
+
 					if len(rooms) == 1 && len(rooms[0]) < 1 {
 						rooms = make([]string, 0)
 					}
