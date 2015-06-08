@@ -26,6 +26,14 @@ var CourseSchedule = React.createClass({
 
         var index = ids.indexOf(id);
         ids.splice(index, 1);
+
+        localStorage.setItem("subjects", JSON.stringify(ids));
+    },
+
+    addSubjects: function(subjects) {
+        subjects.forEach(function(subject) {
+            this.addSubject(subject);
+        }.bind(this));
     },
 
     addSubject: function(subject) {
@@ -38,6 +46,8 @@ var CourseSchedule = React.createClass({
         }
 
         ids.push(subject);
+
+        localStorage.setItem("subjects", JSON.stringify(ids));
 
         var url = "/lectures/" + encodeURI(subject) + ".json";
 
@@ -83,6 +93,14 @@ var CourseSchedule = React.createClass({
         };
     },
 
+    componentDidMount: function() {
+        var subjects = localStorage.getItem("subjects");
+
+        if (subjects !== null) {
+            this.addSubjects(JSON.parse(subjects));
+        }
+    },
+
     render: function() {
         return (
             <div className="container">
@@ -94,8 +112,8 @@ var CourseSchedule = React.createClass({
 });
 
 var Controls = React.createClass({
-    addSubjects: function(program) {
-        program.Subjects.map(function(subject) {
+    addProgram: function(program) {
+        program.Subjects.forEach(function(subject) {
             this.props.onSubmit(subject);
         }.bind(this));
     },
@@ -103,7 +121,7 @@ var Controls = React.createClass({
     render: function() {
         return(
             <div className="well">
-                <Selection type="programs" data={this.props.programs} onSubmit={this.addSubjects} />
+                <Selection type="programs" data={this.props.programs} onSubmit={this.addProgram} />
                 <Selection type="subjects" data={this.props.subjects} onSubmit={this.props.onSubmit} />
                 <SelectedSubjects data={this.props.subjects} onClick={this.props.onClick} />
             </div>
