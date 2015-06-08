@@ -220,7 +220,7 @@ var LectureList = React.createClass({displayName: "LectureList",
     render: function() {
         var lectures = this.props.data.map(function(lecture, i) {
             return (
-                React.createElement(Lecture, {data: lecture, key: i})
+                React.createElement(Lecture, {data: lecture, key: i, href: i})
             );
         });
 
@@ -233,6 +233,24 @@ var LectureList = React.createClass({displayName: "LectureList",
 });
 
 var Lecture = React.createClass({displayName: "Lecture",
+    handleClick: function() {
+        var hidden = $(this.getDOMNode()).children("ul");
+        var rooms = hidden[0];
+        var lecturers = hidden[1];
+
+        $(this.getDOMNode()).parent().find("ul:visible").not(hidden).toggle();
+
+        // TODO: remove first clause when rooms are implemented
+        if (this.props.data.rooms && this.props.data.rooms.length > 0) {
+            rooms.toggle();
+        }
+
+        // TODO: remove first clause when lecturers are implemented
+        if (this.props.data.lecturers && this.props.data.lecturers.length > 0) {
+            lecturers.toggle();
+        }
+    },
+
     render: function() {
         var start = new Date(this.props.data.Date);
         var end = new Date(start.valueOf());
@@ -241,11 +259,46 @@ var Lecture = React.createClass({displayName: "Lecture",
         var lectureStart = start.toTimeString().substring(0, 5);
         var lectureEnd = end.toTimeString().substring(0, 5);
 
+        // TODO: remove saftey-net when rooms and lecturers are implemented
+        var rooms = [];
+        var lecturers = [];
+
+        if (this.props.data.rooms) {
+            rooms = this.props.data.rooms;
+        }
+
+        if (this.props.data.lecturers) {
+            lecturers = this.props.data.lecturers;
+        }
+
+        rooms = rooms.map(function(room) {
+            return (
+                React.createElement("li", {className: "label label-success btn-mini", key: room}, room)
+            );
+        });
+
+        lecturers = lecturers.map(function(lecturer) {
+            return (
+                React.createElement("li", {className: "label label-warning btn-mini btn-mini-long", key: lecturer}, lecturer)
+            );
+        });
+
         return (
-            React.createElement("a", {href: "#", className: "list-group-item"}, 
-                React.createElement("h6", {className: "list-group-item-heading"}, this.props.data.Name), 
-                React.createElement("p", {className: "list-group-item-text"}, 
-                    React.createElement("span", {className: "label label-info"}, lectureStart, " - ", lectureEnd)
+            React.createElement("a", {name: this.props.href, href: "#" + this.props.href, className: "list-group-item", onClick: this.handleClick}, 
+                React.createElement("h6", {className: "list-group-item-heading"}, 
+                    this.props.data.Name, 
+                    React.createElement("span", {className: "label label-primary btn-mini pull-right"}, "E-404")
+                ), 
+                React.createElement("div", {className: "clearfix"}), 
+
+                React.createElement("span", {className: "label label-info"}, lectureStart, " - ", lectureEnd), 
+
+                React.createElement("ul", {className: "list-group"}, 
+                    rooms
+                ), 
+
+                React.createElement("ul", {className: "list-group"}, 
+                    lecturers
                 )
             )
         );

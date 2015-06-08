@@ -220,7 +220,7 @@ var LectureList = React.createClass({
     render: function() {
         var lectures = this.props.data.map(function(lecture, i) {
             return (
-                <Lecture data={lecture} key={i} />
+                <Lecture data={lecture} key={i} href={i} />
             );
         });
 
@@ -233,6 +233,24 @@ var LectureList = React.createClass({
 });
 
 var Lecture = React.createClass({
+    handleClick: function() {
+        var hidden = $(this.getDOMNode()).children("ul");
+        var rooms = hidden[0];
+        var lecturers = hidden[1];
+
+        $(this.getDOMNode()).parent().find("ul:visible").not(hidden).toggle();
+
+        // TODO: remove first clause when rooms are implemented
+        if (this.props.data.rooms && this.props.data.rooms.length > 0) {
+            rooms.toggle();
+        }
+
+        // TODO: remove first clause when lecturers are implemented
+        if (this.props.data.lecturers && this.props.data.lecturers.length > 0) {
+            lecturers.toggle();
+        }
+    },
+
     render: function() {
         var start = new Date(this.props.data.Date);
         var end = new Date(start.valueOf());
@@ -241,12 +259,47 @@ var Lecture = React.createClass({
         var lectureStart = start.toTimeString().substring(0, 5);
         var lectureEnd = end.toTimeString().substring(0, 5);
 
+        // TODO: remove saftey-net when rooms and lecturers are implemented
+        var rooms = [];
+        var lecturers = [];
+
+        if (this.props.data.rooms) {
+            rooms = this.props.data.rooms;
+        }
+
+        if (this.props.data.lecturers) {
+            lecturers = this.props.data.lecturers;
+        }
+
+        rooms = rooms.map(function(room) {
+            return (
+                <li className="label label-success btn-mini" key={room}>{room}</li>
+            );
+        });
+
+        lecturers = lecturers.map(function(lecturer) {
+            return (
+                <li className="label label-warning btn-mini btn-mini-long" key={lecturer}>{lecturer}</li>
+            );
+        });
+
         return (
-            <a href="#" className="list-group-item">
-                <h6 className="list-group-item-heading">{this.props.data.Name}</h6>
-                <p className="list-group-item-text">
-                    <span className="label label-info">{lectureStart} - {lectureEnd}</span>
-                </p>
+            <a name={this.props.href} href={"#" + this.props.href} className="list-group-item" onClick={this.handleClick}>
+                <h6 className="list-group-item-heading">
+                    {this.props.data.Name}
+                    <span className="label label-primary btn-mini pull-right">E-404</span>
+                </h6>
+                <div className="clearfix"></div>
+
+                <span className="label label-info">{lectureStart} - {lectureEnd}</span>
+
+                <ul className="list-group">
+                    {rooms}
+                </ul>
+
+                <ul className="list-group">
+                    {lecturers}
+                </ul>
             </a>
         );
     }
