@@ -257,7 +257,14 @@ var Lecture = React.createClass({displayName: "Lecture",
         var lectureStart = start.toTimeString().substring(0, 5);
         var lectureEnd = end.toTimeString().substring(0, 5);
 
-        rooms = this.props.data.Rooms.map(function(room) {
+        var firstRoom;
+        var numRooms = this.props.data.Rooms.length;
+
+        if (numRooms> 0) {
+            firstRoom = this.props.data.Rooms[0];
+        }
+
+        rooms = this.props.data.Rooms.slice(1, numRooms).map(function(room) {
             return (
                 React.createElement("li", {className: "label label-success btn-mini", key: room}, room)
             );
@@ -273,7 +280,7 @@ var Lecture = React.createClass({displayName: "Lecture",
             React.createElement("a", {name: this.props.href, href: "#" + this.props.href, className: "list-group-item", onClick: this.handleClick}, 
                 React.createElement("h6", {className: "list-group-item-heading"}, 
                     this.props.data.Name, 
-                    React.createElement("span", {className: "label label-primary btn-mini pull-right"}, "E-404")
+                    React.createElement("span", {className: "label label-primary btn-mini pull-right"}, firstRoom)
                 ), 
                 React.createElement("div", {className: "clearfix"}), 
 

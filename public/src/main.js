@@ -257,7 +257,14 @@ var Lecture = React.createClass({
         var lectureStart = start.toTimeString().substring(0, 5);
         var lectureEnd = end.toTimeString().substring(0, 5);
 
-        rooms = this.props.data.Rooms.map(function(room) {
+        var firstRoom;
+        var numRooms = this.props.data.Rooms.length;
+
+        if (numRooms> 0) {
+            firstRoom = this.props.data.Rooms[0];
+        }
+
+        rooms = this.props.data.Rooms.slice(1, numRooms).map(function(room) {
             return (
                 <li className="label label-success btn-mini" key={room}>{room}</li>
             );
@@ -273,7 +280,7 @@ var Lecture = React.createClass({
             <a name={this.props.href} href={"#" + this.props.href} className="list-group-item" onClick={this.handleClick}>
                 <h6 className="list-group-item-heading">
                     {this.props.data.Name}
-                    <span className="label label-primary btn-mini pull-right">E-404</span>
+                    <span className="label label-primary btn-mini pull-right">{firstRoom}</span>
                 </h6>
                 <div className="clearfix"></div>
 
